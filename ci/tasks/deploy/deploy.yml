@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: springcloudservices/spring-cloud-base
+
+inputs:
+- name: src
+
+params:
+  CF_API:
+  CF_USER: 
+  CF_PASSWORD:
+  CF_ORG:
+  CF_SPACE:
+
+run:
+  path: src/ci/tasks/deploy/deploy.sh

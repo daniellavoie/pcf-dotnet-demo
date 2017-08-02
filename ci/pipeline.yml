@@ -1,0 +1,61 @@
+---
+resource_types:
+- name: github-pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+jobs:
+- name: build-master
+  plan:
+  - get: src-master
+    trigger: true
+  - get: master-version
+    params:
+      pre: build
+  - task: build-solution
+    file: src-master/ci/tasks/build-solution/build-solution.yml
+    input_mapping:
+      src: src-master
+  - put: master-version
+    params: {file: master-version/number}
+
+- name: integration-tests
+  plan:
+  - get: src-master
+    passed: [build-master]
+  - get: master-version
+    trigger: true
+    passed: [build-master]
+  - task: deploy
+    file: src-master/ci/tasks/deploy/deploy.yml
+    input_mapping:
+      version: master-version
+      src: src-master
+    params:
+      CF_API: {{cf-api}}
+      CF_USER: {{cf-user}}
+      CF_PASSWORD: {{cf-password}}
+      CF_ORG: {{cf-org}}
+      CF_SPACE: {{cf-space}}
+
+resources:
+
+- name: src-master
+  type: git
+  source:
+    uri: {{github-url}}
+    username: {{github-username}}
+    password: {{github-password}}
+    branch: ftq-demo
+
+- name: master-version
+  type: semver
+  source:
+    driver: git
+    uri: {{github-url}}
+    username: {{github-username}}
+    password: {{github-password}}
+    branch: locks
+    file: master-version
+    initial_version: '0.0.1-build.1'
