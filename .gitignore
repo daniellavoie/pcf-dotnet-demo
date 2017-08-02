@@ -21,7 +21,6 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-/publish/
 tmp
 
 # Visual Studio 2015 cache/options directory
@@ -135,10 +134,7 @@ DocProject/Help/*.hhc
 DocProject/Help/*.hhk
 DocProject/Help/*.hhp
 DocProject/Help/Html2
-DocProject/Help/html
-
-# Click-Once directory
-publish/
+DocProject/Help/htmls
 
 # Publish Web Output
 *.[Pp]ublish.xml
