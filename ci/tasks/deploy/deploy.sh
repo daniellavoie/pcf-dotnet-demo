@@ -12,4 +12,7 @@ cf api $CF_API --skip-ssl-validation
 cf auth $CF_USER $CF_PASSWORD
 
 cf target -o $CF_ORG -s $CF_SPACE
+
+ls -l src/publish/*
+
 cf push -f src/publish/manifest.yml
