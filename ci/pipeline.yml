@@ -20,13 +20,15 @@ jobs:
   - put: master-version
     params: {file: master-version/number}
 
-- name: integration-tests
+- name: deploy
+  serial_groups: [acceptance-tests]
   plan:
   - get: src-master
     passed: [build-master]
   - get: master-version
     trigger: true
     passed: [build-master]
+  - get: blobs
   - task: deploy
     file: src-master/ci/tasks/deploy/deploy.yml
     input_mapping:
@@ -38,6 +40,57 @@ jobs:
       CF_PASSWORD: {{cf-password}}
       CF_ORG: {{cf-org}}
       CF_SPACE: {{cf-space}}
+
+- name: run-acceptance-tests
+  serial_groups: [acceptance-tests]
+  plan:
+  - get: src-master
+    passed: [deploy]
+  - get: blobs
+    passed: [deploy]
+  - get: master-version
+    trigger: true
+    passed: [deploy]
+  - task: run-acceptance-tests
+    file: src-master/ci/tasks/acceptance-tests/acceptance-tests.yml    
+    input_mapping:
+      src: src-master
+
+- name: clean-environment
+  serial_groups: [acceptance-tests]
+  plan:
+  - get: src-master
+    passed: [run-acceptance-tests]
+  - get: master-version
+    trigger: true
+    passed: [run-acceptance-tests]
+  - task: clean-environment
+    file: src-master/ci/tasks/clean-environment/clean-environment.yml
+    input_mapping:
+      src: src-master
+    params:
+      CF_API: {{cf-api}}
+      CF_USER: {{cf-user}}
+      CF_PASSWORD: {{cf-password}}
+      CF_ORG: {{cf-org}}
+      CF_SPACE: {{cf-space}}
+
+- name: stage-artefacts
+  plan:
+  - get: src-master
+    passed: [run-acceptance-tests]
+  - get: master-version
+    trigger: true
+    passed: [run-acceptance-tests]
+  - get: blobs
+    passed: [run-acceptance-tests]
+  - task: stage-artefacts
+    file: src-master/ci/tasks/stage-artefacts/stage-artefacts.yml
+    input_mapping:
+      src: src-master
+  - put: artefacts-production
+    params:
+      file: blobs/publish.zip
 
 resources:
 
@@ -59,3 +112,21 @@ resources:
     branch: locks
     file: master-version
     initial_version: '0.0.1-build.1'
+
+- name: blobs
+  type: s3
+  source:
+    bucket: {{s3-bucket}}
+    versioned_file: publish.zip
+    region_name: us-east-2
+    access_key_id: {{s3-access-key-id}}
+    secret_access_key: {{s3-secret-access-key}}
+
+- name: artefacts-production
+  type: s3
+  source:
+    bucket: {{s3-bucket}}
+    versioned_file: artefacts-production/publish.zip
+    region_name: us-east-2
+    access_key_id: {{s3-access-key-id}}
+    secret_access_key: {{s3-secret-access-key}}

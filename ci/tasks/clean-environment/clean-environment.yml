@@ -7,8 +7,7 @@ image_resource:
     repository: springcloudservices/spring-cloud-base
 
 inputs:
-- name: src
-- name: blobs
+  - name: src
 
 params:
   CF_API:
@@ -18,4 +17,4 @@ params:
   CF_SPACE:
 
 run:
-  path: src/ci/tasks/deploy/deploy.sh
+  path: src/ci/tasks/clean-environment/clean-environment.sh
