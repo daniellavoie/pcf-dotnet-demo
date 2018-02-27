@@ -13,18 +13,6 @@
       {
          "enabled":false,
          "definition":{
-            "id":"7c555368-ca64-4199-add6-9ebaf0b0137d"
-         },
-         "inputs":{
-            "multipliers":"[]",
-            "parallel":"false",
-            "continueOnError":"true",
-            "additionalFields":"{}"
-         }
-      },
-      {
-         "enabled":false,
-         "definition":{
             "id":"a9db38f9-9fdc-478c-b0f9-464221e58316"
          },
          "inputs":{
